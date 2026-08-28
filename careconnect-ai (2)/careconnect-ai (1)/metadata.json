@@ -1,6 +1,0 @@
-{
-  "name": "CareConnect AI",
-  "description": "Intelligent Healthcare Navigation, AI Clinical Assistant, Specialist Booking, Women's Health & Cycle Tracker, and Personal Health Records",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

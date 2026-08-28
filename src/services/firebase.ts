@@ -3,7 +3,9 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   sendPasswordResetEmail,
+  signInWithPopup,
   signOut,
   Auth,
 } from "firebase/auth";
@@ -58,11 +60,31 @@ export async function firebaseLogin(email: string, password: string) {
   }
 }
 
+export async function firebaseGoogleLogin() {
+  const a = getFirebaseAuth();
+  if (!a) throw new Error("Firebase not configured");
+  const cred = await signInWithPopup(a, new GoogleAuthProvider());
+  return cred.user.getIdToken();
+}
+
 export async function firebaseRegister(email: string, password: string) {
   const a = getFirebaseAuth();
   if (!a) throw new Error("Firebase not configured");
-  const cred = await createUserWithEmailAndPassword(a, email, password);
-  return cred.user.getIdToken();
+  try {
+    const cred = await createUserWithEmailAndPassword(a, email, password);
+    return cred.user.getIdToken();
+  } catch (error: any) {
+    if (error?.code === "auth/email-already-in-use") {
+      throw new Error("This email already has an account. Please sign in instead.");
+    }
+    if (error?.code === "auth/weak-password") {
+      throw new Error("Choose a stronger password with at least 6 characters.");
+    }
+    if (error?.code === "auth/operation-not-allowed") {
+      throw new Error("Firebase Email/Password sign-up is disabled. Enable it in Firebase Console > Authentication > Sign-in method.");
+    }
+    throw new Error(error?.message || "Account creation failed");
+  }
 }
 
 export async function firebaseResetPassword(email: string) {

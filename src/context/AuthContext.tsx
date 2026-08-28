@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { api } from "../services/api";
-import { firebaseLogin, firebaseRegister, firebaseResetPassword, firebaseLogout, isFirebaseConfigured } from "../services/firebase";
+import { firebaseLogin, firebaseGoogleLogin, firebaseRegister, firebaseResetPassword, firebaseLogout, isFirebaseConfigured } from "../services/firebase";
 import { UserProfile } from "../types";
 
 interface AuthContextType {
@@ -10,6 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   demoMode: boolean;
   login: (email: string, password?: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   register: (email: string, fullName: string, password?: string) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -91,6 +92,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const loginWithGoogle = async () => {
+    setIsLoading(true);
+    try {
+      if (!isFirebaseConfigured()) throw new Error("Google sign-in requires Firebase configuration.");
+      const idToken = await firebaseGoogleLogin();
+      const result = await api.firebaseAuth(idToken);
+      api.setToken(result.token);
+      setToken(result.token);
+      setUser(result.user);
+      setDemoMode(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     await firebaseLogout().catch(() => {});
     api.clearToken();
@@ -102,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isFirebaseConfigured()) {
       await firebaseResetPassword(email);
     } else {
-      throw new Error("Password reset requires Firebase. Use demo login or configure Firebase.");
+      throw new Error("Password reset requires Firebase configuration.");
     }
   };
 
@@ -120,6 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: Boolean(user && token),
         demoMode,
         login,
+        loginWithGoogle,
         register,
         logout,
         resetPassword,
