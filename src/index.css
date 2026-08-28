@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+	min-height: 100%;
+}
+
+body {
+	background-color: #e8f0f2;
+	background-image: linear-gradient(rgba(232, 240, 242, 0.68), rgba(232, 240, 242, 0.68)), url("https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1800");
+	background-position: center;
+	background-size: cover;
+	background-attachment: fixed;
+}
